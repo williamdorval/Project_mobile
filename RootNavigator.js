@@ -1,15 +1,36 @@
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useAuth } from "./context/AuthContext";
 
-import BottomNav from './components/BottomNav';
+import LoginScreen from "./screens/LoginScreen";
+import SignupScreen from "./screens/SignupScreen";
+import CompleteProfileScreen from "./screens/CompleteProfileScreen";
 
+// 👉 CORRECTION : on importe BottomNav comme MainTabs
+import MainTabs from "./components/BottomNav";
 
-const Stack = createStackNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
+  const { user } = useAuth();
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="MainTabs" component={BottomNav} />
+
+      {!user && (
+        <>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Signup" component={SignupScreen} />
+        </>
+      )}
+
+      {user && !user.profile && (
+        <Stack.Screen name="CompleteProfile" component={CompleteProfileScreen} />
+      )}
+
+      {user && user.profile && (
+        <Stack.Screen name="MainTabs" component={MainTabs} />
+      )}
+
     </Stack.Navigator>
   );
 }

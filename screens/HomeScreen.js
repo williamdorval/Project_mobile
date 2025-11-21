@@ -11,14 +11,14 @@ export default function HomeScreen() {
     <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       
       <Text style={[styles.title, { color: theme.colors.text }]}>
-        Bienvenue à GymRank 💪
+        Bienvenue à GymRank 
       </Text>
 
       <Text style={[styles.subtitle, { color: theme.colors.muted }]}>
         Améliore ton physique jour après jour.
       </Text>
 
-      {/* Bouton commencer */}
+     
       <TouchableOpacity 
         onPress={() => navigation.navigate("Entrainement")}
         style={[styles.button, { backgroundColor: theme.colors.accent }]}
@@ -26,7 +26,7 @@ export default function HomeScreen() {
         <Text style={styles.buttonText}>Commencer un entraînement</Text>
       </TouchableOpacity>
 
-      {/* Quick cards */}
+     
       <View style={styles.cards}>
         <View style={[styles.card, { backgroundColor: theme.colors.card }]}>
           <Text style={[styles.cardTitle, { color: theme.colors.text }]}>Programme</Text>

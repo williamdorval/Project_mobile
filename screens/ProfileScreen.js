@@ -1,22 +1,49 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../context/AuthContext';
 import { Calendar } from 'react-native-calendars';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
   const theme = useTheme();
+  const { user, logout } = useAuth();
+
+  
+  if (!user) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Tu n’es pas connecté</Text>
+
+        <TouchableOpacity
+          style={[styles.setting, { backgroundColor: theme.colors.card }]}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={{ color: theme.colors.text }}>Se connecter</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.setting, { backgroundColor: theme.colors.card }]}
+          onPress={() => navigation.navigate("Signup")}
+        >
+          <Text style={{ color: theme.colors.text }}>Créer un compte</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      
       <Text style={[styles.title, { color: theme.colors.text }]}>Mon Profil</Text>
 
-      {/* 🔥 Streak */}
+      <Text style={{ color: theme.colors.muted, marginBottom: 15 }}>
+        Connecté en tant que : {user.email}
+      </Text>
+
       <Text style={[styles.streak, { color: theme.colors.accent }]}>
         🔥 Streak actuel : 5 jours
       </Text>
 
-      {/* 📅 Calendrier */}
       <Calendar
         theme={{
           backgroundColor: theme.colors.background,
@@ -24,46 +51,23 @@ export default function ProfileScreen() {
           dayTextColor: theme.colors.text,
           monthTextColor: theme.colors.accent,
           arrowColor: theme.colors.accent,
-          todayTextColor: theme.colors.accentAlt,
-        }}
-
-        markedDates={{
-          '2025-01-10': { selected: true, selectedColor: theme.colors.accent },
-          '2025-01-11': { selected: true, selectedColor: theme.colors.accent },
-          '2025-01-12': { selected: true, selectedColor: theme.colors.accent },
-        }}
-        style={{
-          borderRadius: 12,
-          marginBottom: 20,
+          todayTextColor: theme.colors.accent,
         }}
       />
 
-      {/* ⚙️ Paramètres */}
-      <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>
-        Paramètres
-      </Text>
-
-      <TouchableOpacity 
-        style={[styles.setting, { backgroundColor: theme.colors.card }]}
-        onPress={theme.toggle}
+      <TouchableOpacity
+        style={[styles.setting, { backgroundColor: theme.colors.card, marginTop: 20 }]}
+        onPress={logout}
       >
-        <Text style={{ color: theme.colors.text }}>Activer / Désactiver Dark Mode</Text>
+        <Text style={{ color: theme.colors.text }}>Se déconnecter</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity 
-        style={[styles.setting, { backgroundColor: theme.colors.card }]}
-      >
-        <Text style={{ color: theme.colors.text }}>Modifier Profil</Text>
-      </TouchableOpacity>
-
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, justifyContent: "center" },
   title: { fontSize: 30, fontWeight: 'bold', marginBottom: 20 },
   streak: { fontSize: 18, marginBottom: 20 },
-  sectionTitle: { fontSize: 20, marginTop: 10, marginBottom: 10 },
   setting: { padding: 15, borderRadius: 10, marginBottom: 10 },
 });
