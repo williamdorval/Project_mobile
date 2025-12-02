@@ -13,7 +13,7 @@ export const ThemeProvider = ({ children }) => {
           background: '#000000ff',   
           card: '#343135ff',
           text: '#fff',
-          accent: '#167c01ff',       
+          accent: '#7c010fff',       
           accentAlt: '#e3526e',    
           action: '#86f4ee',       
           muted: '#bdbdbd',

@@ -13,15 +13,12 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     const ok = await login(email, password);
-    if (!ok) {
-      setError("Email ou mot de passe incorrect");
-      return;
-    }
+    if (!ok) setError("Email ou mot de passe incorrect");
   };
+
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      
       <Text style={[styles.title, { color: theme.colors.text }]}>Connexion</Text>
 
       {error ? <Text style={[styles.error, { color: "red" }]}>{error}</Text> : null}
@@ -77,11 +74,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 15,
   },
-  button: {
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-  },
+  button: { padding: 15, borderRadius: 12, marginBottom: 10 },
   buttonText: { textAlign: "center", fontWeight: "bold", fontSize: 16 },
   link: { marginTop: 10, textAlign: "center", fontSize: 16 },
 });

@@ -1,48 +1,41 @@
 import React, { createContext, useContext, useState } from "react";
-import {
-  signupUser,
-  loginUser,
-  getProfile,
-  updateProfile
-} from "../services/martha.service";
+import AuthService from "../services/auth.service";
+import UserCredentials from "../models/UserCredentials.model";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  const login = async (email, password) => {
-    const u = await loginUser(email, password);
-    if (!u) return false;
-    setUser(u);
-    return true;
-  };
+  async function login(email, password) {
+    const credentials = new UserCredentials({ email, password });
+    const ok = await AuthService.login(credentials);
 
-  const signup = async (email, password) => {
-    const u = await signupUser(email, password);
-    if (!u) return false;
-    setUser(u);
-    return true;
-  };
+    if (ok) setUser(AuthService.currentUser);
+    return ok;
+  }
 
-  const saveProfile = async (profile) => {
-    await updateProfile({ id: user.id, ...profile });
-    const newData = await getProfile(user.id);
-    setUser(newData);
-  };
+  async function signup(email, password, username) {
+    const credentials = new UserCredentials({ email, password, username });
+    const ok = await AuthService.signup(credentials);
 
-  const logout = () => setUser(null);
+    if (ok) setUser(AuthService.currentUser);
+    return ok;
+  }
+
+  async function updateProfile(values) {
+    const ok = await AuthService.updateProfile(values);
+    if (ok) setUser(AuthService.currentUser);
+    return ok;
+  }
+
+  function logout() {
+    AuthService.logout();
+    setUser(null);
+  }
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        signup,
-        saveProfile,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ user, login, signup, updateProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );

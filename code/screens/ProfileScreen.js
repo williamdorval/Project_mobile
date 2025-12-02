@@ -11,10 +11,10 @@ export default function ProfileScreen({ navigation }) {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
 
-      {/* --- TITRE --- */}
+      
       <Text style={[styles.title, { color: theme.colors.text }]}>Profil</Text>
 
-      {/* 🔥 SECTION PARAMÈTRES TOUJOURS DISPONIBLE */}
+      
       <Text style={[styles.sectionTitle, { color: theme.colors.accent }]}>
         Paramètres de l’application
       </Text>
@@ -22,7 +22,7 @@ export default function ProfileScreen({ navigation }) {
       <View style={[styles.setting, { backgroundColor: theme.colors.card }]}>
         <Text style={{ color: theme.colors.text }}>Mode sombre</Text>
 
-        {/* ⭐ IMPORTANT : utiliser theme.dark et theme.toggle */}
+        
         <Switch
           value={theme.dark}
           onValueChange={theme.toggle}
@@ -31,7 +31,7 @@ export default function ProfileScreen({ navigation }) {
         />
       </View>
 
-      {/* 🔒 SECTION COMPTE (SI NON CONNECTÉ) */}
+    
       {!user && (
         <>
           <Text style={[styles.sectionTitle, { color: theme.colors.accent, marginTop: 20 }]}>
@@ -54,7 +54,7 @@ export default function ProfileScreen({ navigation }) {
         </>
       )}
 
-      {/* 🔓 SECTION COMPTE (SI CONNECTÉ) */}
+      
       {user && (
         <>
           <Text style={[styles.sectionTitle, { color: theme.colors.accent, marginTop: 20 }]}>

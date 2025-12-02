@@ -13,16 +13,13 @@ export default function SignupScreen({ navigation }) {
   const [error, setError] = useState("");
 
   const handleSignup = async () => {
-    const ok = await signup(email, password);
-    if (!ok) {
-      setError("Un compte avec cet email existe déjà.");
-      return;
-    }
+    const ok = await signup(email, password, username);
+    if (!ok) setError("Un compte existe déjà");
+
   };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      
       <Text style={[styles.title, { color: theme.colors.text }]}>Créer un compte</Text>
 
       {error ? <Text style={[styles.error, { color: "red" }]}>{error}</Text> : null}
@@ -32,10 +29,7 @@ export default function SignupScreen({ navigation }) {
         placeholderTextColor={theme.colors.muted}
         value={username}
         onChangeText={setUsername}
-        style={[
-          styles.input,
-          { backgroundColor: theme.colors.card, color: theme.colors.text }
-        ]}
+        style={[styles.input, { backgroundColor: theme.colors.card, color: theme.colors.text }]}
       />
 
       <TextInput
@@ -43,10 +37,7 @@ export default function SignupScreen({ navigation }) {
         placeholderTextColor={theme.colors.muted}
         value={email}
         onChangeText={setEmail}
-        style={[
-          styles.input,
-          { backgroundColor: theme.colors.card, color: theme.colors.text }
-        ]}
+        style={[styles.input, { backgroundColor: theme.colors.card, color: theme.colors.text }]}
       />
 
       <TextInput
@@ -55,10 +46,7 @@ export default function SignupScreen({ navigation }) {
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        style={[
-          styles.input,
-          { backgroundColor: theme.colors.card, color: theme.colors.text }
-        ]}
+        style={[styles.input, { backgroundColor: theme.colors.card, color: theme.colors.text }]}
       />
 
       <TouchableOpacity
@@ -69,11 +57,8 @@ export default function SignupScreen({ navigation }) {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text style={[styles.link, { color: theme.colors.accent }]}>
-          Déjà un compte ? Connexion
-        </Text>
+        <Text style={[styles.link, { color: theme.colors.accent }]}>Déjà un compte ? Connexion</Text>
       </TouchableOpacity>
-
     </View>
   );
 }
@@ -89,11 +74,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 15,
   },
-  button: {
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 10,
-  },
+  button: { padding: 15, borderRadius: 12, marginBottom: 10 },
   buttonText: { textAlign: "center", fontWeight: "bold", fontSize: 16 },
   link: { marginTop: 10, textAlign: "center", fontSize: 16 },
 });

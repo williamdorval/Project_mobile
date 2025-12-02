@@ -8,21 +8,19 @@ async function callQuery(name, body) {
       auth: AUTH,
       "Content-Type": "application/json"
     },
-    body: body ? JSON.stringify(body) : undefined
+    body: JSON.stringify(body)
   }).then(r => r.json());
 
   if (!res.success) throw new Error(res.error || "Query failed");
-  return res.data;
+  return res;
 }
 
-
+export async function signupUser(email, password, username) {
+  return await callQuery("insert-user", { email, password, username });
+}
 
 export async function loginUser(email, password) {
-  return await callQuery("login-user", { email, password });
-}
-
-export async function signupUser(email, password) {
-  return await callQuery("signup-user", { email, password });
+  return await callQuery("select-user-auth", { email, password });
 }
 
 export async function getProfile(id) {
