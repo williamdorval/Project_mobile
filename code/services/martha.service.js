@@ -15,13 +15,14 @@ async function callQuery(name, body) {
   return res;
 }
 
-export async function signupUser(email, password, username) {
-  return await callQuery("insert-user", { email, password, username });
+export async function signupUser(username, email, password) {
+  return await callQuery("insert-user", { username, email, password });
 }
 
 export async function loginUser(email, password) {
   return await callQuery("select-user-auth", { email, password });
 }
+
 
 export async function getProfile(id) {
   return await callQuery("get-profile", { id });
