@@ -77,3 +77,23 @@ export async function fetchUserById(id) {
   const r = await marthaPostSimple("select-user-by-id", { id });
   return r?.data?.[0] ?? null;
 }
+
+export async function getUserWorkouts(id) {
+  const r = await marthaPostSimple("select-workouts-by-user", { id });
+  return r?.data ?? [];
+}
+
+export async function getWorkoutDates(id) {
+  const r = await marthaPostSimple("select-workout-dates", { id });
+  return r?.data ?? [];
+}
+
+export async function getMonthlyWorkoutCount(id) {
+  const r = await marthaPostSimple("select-month-workout-count", { id });
+  return r?.data?.[0]?.total ?? 0;
+}
+
+export async function getUserStreak(id) {
+  const r = await marthaPostSimple("select-user-streak", { id });
+  return r?.data?.[0]?.streak ?? 0;
+}
