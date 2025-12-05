@@ -11,10 +11,9 @@ export default function ProfileScreen({ navigation }) {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
 
-      
       <Text style={[styles.title, { color: theme.colors.text }]}>Profil</Text>
 
-      
+      {/* PARAMÈTRES APP */}
       <Text style={[styles.sectionTitle, { color: theme.colors.accent }]}>
         Paramètres de l’application
       </Text>
@@ -22,7 +21,6 @@ export default function ProfileScreen({ navigation }) {
       <View style={[styles.setting, { backgroundColor: theme.colors.card }]}>
         <Text style={{ color: theme.colors.text }}>Mode sombre</Text>
 
-        
         <Switch
           value={theme.dark}
           onValueChange={theme.toggle}
@@ -31,7 +29,7 @@ export default function ProfileScreen({ navigation }) {
         />
       </View>
 
-    
+      {/* PAS CONNECTÉ */}
       {!user && (
         <>
           <Text style={[styles.sectionTitle, { color: theme.colors.accent, marginTop: 20 }]}>
@@ -54,7 +52,7 @@ export default function ProfileScreen({ navigation }) {
         </>
       )}
 
-      
+      {/* CONNECTÉ */}
       {user && (
         <>
           <Text style={[styles.sectionTitle, { color: theme.colors.accent, marginTop: 20 }]}>
@@ -67,10 +65,27 @@ export default function ProfileScreen({ navigation }) {
             </Text>
           </View>
 
+          {/* ➕ INFOS AJOUTÉES : POIDS / TAILLE / OBJECTIF */}
+          <View style={{ marginBottom: 20 }}>
+            <Text style={{ color: theme.colors.text }}>
+              Poids : <Text style={{ color: theme.colors.accent }}>{user.weight || "Non défini"} kg</Text>
+            </Text>
+
+            <Text style={{ color: theme.colors.text }}>
+              Taille : <Text style={{ color: theme.colors.accent }}>{user.height_cm || "Non défini"} cm</Text>
+            </Text>
+
+            <Text style={{ color: theme.colors.text }}>
+              Objectif : <Text style={{ color: theme.colors.accent }}>{user.goal || "Aucun"}</Text>
+            </Text>
+          </View>
+
+          {/* STREAK */}
           <Text style={[styles.streak, { color: theme.colors.accent }]}>
             🔥 Streak actuel : 5 jours
           </Text>
 
+          {/* CALENDRIER */}
           <Calendar
             theme={{
               backgroundColor: theme.colors.background,
@@ -82,6 +97,7 @@ export default function ProfileScreen({ navigation }) {
             }}
           />
 
+          {/* LOGOUT */}
           <TouchableOpacity
             style={[styles.setting, { backgroundColor: theme.colors.card, marginTop: 20 }]}
             onPress={logout}
