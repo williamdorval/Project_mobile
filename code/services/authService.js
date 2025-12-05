@@ -1,5 +1,6 @@
 import { insertUser, selectUserAuth } from "./martha";
 import { MARTHA_APP_AUTH } from "./config";
+import { fetchUserById, updateUserProfile } from "../services/martha";
 
 export async function loginWithMartha(email, password) {
   const e = email.trim();
@@ -28,3 +29,11 @@ export async function signupWithMartha(username, email, password) {
 
   return loginWithMartha(e, p);
 }
+
+
+const updateProfile = async (newData) => {
+  await updateUserProfile({ id: user.id, ...newData });
+
+  const updated = await fetchUserById(user.id);
+  setUser(updated);
+};

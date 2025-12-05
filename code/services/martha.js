@@ -1,5 +1,6 @@
 import { MARTHA_APP_AUTH, MARTHA_BASE } from "./config";
 
+
 export function marthaPostSimple(queryName, body) {
   console.log("==== MARTHA DEBUG REQUEST ====");
   console.log("Query:", queryName);
@@ -34,4 +35,45 @@ export async function getExercicesByMuscle(muscle) {
   if (!res) return [];
   if (res.data) return res.data;
   return [];
+}
+
+export async function getUserById(id) {
+  const r = await marthaPostSimple("select-user-by-id", { id });
+  return r?.data?.[0] ?? null;
+}
+
+
+export async function getNextWorkout(id) {
+  const r = await marthaPostSimple("select-next-workout", { id });
+  return r?.data?.[0] ?? null;
+}
+
+// 🔹 5 dernières stats
+export async function getLastStats(id) {
+  const r = await marthaPostSimple("select-last-stats", { id });
+  return r?.data ?? [];
+}
+
+// 🔹 Groupes musculaires faibles
+export async function getWeakMuscles(id) {
+  const r = await marthaPostSimple("select-weak-muscles", { id });
+  return r?.data ?? [];
+}
+
+export async function signupUser(username, email, password) {
+  return marthaPostSimple("insert-user", { username, email, password });
+}
+
+export async function authenticateUser(email, password) {
+  const r = await marthaPostSimple("select-user-auth", { email, password });
+  return r?.data?.[0] ?? null;
+}
+
+export async function updateUserProfile(data) {
+  return marthaPostSimple("update-user-profile", data);
+}
+
+export async function fetchUserById(id) {
+  const r = await marthaPostSimple("select-user-by-id", { id });
+  return r?.data?.[0] ?? null;
 }

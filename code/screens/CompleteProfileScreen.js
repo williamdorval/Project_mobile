@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
 
-export default function CompleteProfileScreen() {
+export default function CompleteProfileScreen({ navigation }) {
   const theme = useTheme();
   const { updateProfile } = useAuth();
 
@@ -14,24 +14,23 @@ export default function CompleteProfileScreen() {
   const [gender, setGender] = useState(null);
   const [goal, setGoal] = useState(null);
 
-  const GOALS = [
-    "Perte de poids",
-    "Gain de masse",
-    "Gain de muscle",
-    "Autre"
-  ];
+  const GOALS = ["Perte de poids", "Gain de masse", "Gain de muscle", "Autre"];
 
-  const handleContinue = () => {
-    updateProfile({
+  const handleContinue = async () => {
+    await updateProfile({
       firstName,
       lastName,
-      weight,
-      height,
+      weight: Number(weight),
+      height: Number(height),
       gender,
       goal,
     });
 
-   
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "MainTabs" }],
+    });
+
   };
 
   return (
@@ -77,7 +76,7 @@ export default function CompleteProfileScreen() {
 
       <Text style={{ color: theme.colors.text, marginBottom: 8 }}>Sexe :</Text>
       <View style={styles.row}>
-        {["Homme", "Femme", "Autre"].map((g) => (
+        {["Homme", "Femme"].map((g) => (
           <TouchableOpacity
             key={g}
             onPress={() => setGender(g)}

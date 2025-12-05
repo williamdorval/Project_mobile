@@ -14,22 +14,19 @@ export default function SignupScreen({ navigation }) {
   const [error, setError] = useState("");
 
   const handleSignup = async () => {
-    try {
-      setError("");
-      const { auth, user } = await signupWithMartha(username, email, password);
+  try {
+    setError("");
 
-      // ✅ Connecte l'utilisateur dans le contexte
-      login(auth, user);
+    const { auth, user } = await signupWithMartha(username, email, password);
 
-      // ✅ Envoie sur MainTabs
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "MainTabs" }],
-      });
-    } catch (err) {
-      setError(err.message || "Un compte existe déjà");
-    }
-  };
+    login(auth, user);
+
+    navigation.navigate("CompleteProfile");
+
+  } catch (err) {
+    setError(err.message || "Erreur lors de la création du compte");
+  }
+};
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
