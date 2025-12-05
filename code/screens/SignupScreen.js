@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { signupWithMartha } from "../services/authService";
 
 export default function SignupScreen({ navigation }) {
   const theme = useTheme();
-  const { signup } = useAuth();
+  const { login } = useAuth();
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -13,9 +14,21 @@ export default function SignupScreen({ navigation }) {
   const [error, setError] = useState("");
 
   const handleSignup = async () => {
-    const ok = await signup(email, password, username);
-    if (!ok) setError("Un compte existe déjà");
+    try {
+      setError("");
+      const { auth, user } = await signupWithMartha(username, email, password);
 
+      // ✅ Connecte l'utilisateur dans le contexte
+      login(auth, user);
+
+      // ✅ Envoie sur MainTabs
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "MainTabs" }],
+      });
+    } catch (err) {
+      setError(err.message || "Un compte existe déjà");
+    }
   };
 
   return (
@@ -57,7 +70,9 @@ export default function SignupScreen({ navigation }) {
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-        <Text style={[styles.link, { color: theme.colors.accent }]}>Déjà un compte ? Connexion</Text>
+        <Text style={[styles.link, { color: theme.colors.accent }]}>
+          Déjà un compte ? Connexion
+        </Text>
       </TouchableOpacity>
     </View>
   );

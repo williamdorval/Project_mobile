@@ -1,11 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
+import { useNavigation } from '@react-navigation/native';
 
 export default function EntrainementScreen() {
   const theme = useTheme();
+  const navigation = useNavigation();
 
-  const muscles = ["Poitrine", "Dos", "Épaules", "Jambes", "Bras", "Abdos"];
+const muscles = ["Pectoraux", "Dos", "Épaules", "Jambes", "Bras"];
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -15,6 +17,7 @@ export default function EntrainementScreen() {
         <TouchableOpacity
           key={index}
           style={[styles.card, { backgroundColor: theme.colors.card }]}
+          onPress={() => navigation.navigate("Exercices", { groupe: m })}
         >
           <Text style={[styles.cardText, { color: theme.colors.text }]}>{m}</Text>
         </TouchableOpacity>

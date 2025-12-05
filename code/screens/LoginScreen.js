@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { loginWithMartha } from "../services/authService";
 
 export default function LoginScreen({ navigation }) {
   const theme = useTheme();
@@ -12,10 +13,22 @@ export default function LoginScreen({ navigation }) {
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    const ok = await login(email, password);
-    if (!ok) setError("Email ou mot de passe incorrect");
-  };
+    try {
+      setError("");
+      const { auth, user } = await loginWithMartha(email, password);
 
+      // ✅ Enregistre l’utilisateur dans le contexte
+      login(auth, user);
+
+      // ✅ Envoie sur MainTabs et enlève Login/Signup de l’historique
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "MainTabs" }],
+      });
+    } catch (err) {
+      setError(err.message || "Email ou mot de passe incorrect");
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -58,7 +71,6 @@ export default function LoginScreen({ navigation }) {
           Créer un compte
         </Text>
       </TouchableOpacity>
-
     </View>
   );
 }
