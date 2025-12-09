@@ -21,17 +21,17 @@ export default function RootNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
 
-      {/* Tabs */}
+    
       <Stack.Screen name="MainTabs" component={MainTabs} />
 
-      {/* Auth */}
+    
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Signup" component={SignupScreen} />
       
-      {/* Profil à compléter */}
+      
       <Stack.Screen name="CompleteProfile" component={CompleteProfileScreen} />
 
-      {/* Exercices */}
+      
       <Stack.Screen name="Exercices" component={ExercicesScreen} />
 
       <Stack.Screen name="CreateWorkout" component={CreateWorkoutScreen} />
