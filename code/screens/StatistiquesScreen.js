@@ -1,108 +1,94 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
-import { LineChart, BarChart, ProgressChart, ContributionGraph } from "react-native-chart-kit";
+import { LineChart, BarChart, ProgressChart } from "react-native-chart-kit";
 import { useTheme } from "../context/ThemeContext";
+import { useAuth } from "../context/AuthContext";
+import { getUserMuscleScores } from "../services/martha";
 
 export default function StatistiquesScreen() {
   const theme = useTheme();
-  const screenWidth = Dimensions.get("window").width - 20;
+  const { user } = useAuth();
+  const width = Dimensions.get("window").width - 20;
 
-  // 🔥 Fake data (tu vas brancher à Martha ensuite)
-  const lineData = {
-    labels: ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin"],
-    datasets: [
-      {
-        data: [40, 45, 48, 50, 55, 60],
-        color: () => theme.colors.accent,
-        strokeWidth: 3,
-      },
-    ],
-  };
+  const [muscleStats, setMuscleStats] = useState([]);
+  const [globalRank, setGlobalRank] = useState("C");
 
-  const barData = {
-    labels: ["Pect", "Dos", "Jambes", "Bras", "Épaules"],
-    datasets: [
-      {
-        data: [7800, 10200, 5400, 6600, 4800],
-      },
-    ],
-  };
+  useEffect(() => {
+    async function load() {
+      if (!user) return;
 
+      const stats = await getUserMuscleScores(user.id);
+      setMuscleStats(stats);
+
+      // ⚡ Calcul du rank global
+      let total = 0;
+      stats.forEach((m) => total += m.rankScore);
+      const avg = total / stats.length;
+
+      setGlobalRank(rankFromScore(avg));
+    }
+    load();
+  }, [user]);
+
+  function rankFromScore(score) {
+    if (score >= 120) return "S";
+    if (score >= 100) return "A";
+    if (score >= 80) return "B";
+    if (score >= 60) return "C";
+    return "D";
+  }
+
+  // 🔥 Podium data
+  const podium = [...muscleStats].sort((a, b) => b.rankScore - a.rankScore).slice(0, 3);
+
+  // Radar / ProgressChart data
   const radarData = {
-    labels: ["Pectoraux", "Dos", "Jambes", "Bras", "Épaules"],
-    data: [0.8, 0.9, 0.6, 1.0, 0.7],
+    labels: muscleStats.map((m) => m.groupe),
+    data: muscleStats.map((m) => Math.min(1, m.rankScore / 120)),
   };
-
-  const heatmapData = [
-    { date: "2025-02-01", count: 1 },
-    { date: "2025-02-03", count: 3 },
-    { date: "2025-02-12", count: 2 },
-    { date: "2025-02-15", count: 4 },
-    { date: "2025-02-17", count: 1 },
-    { date: "2025-02-20", count: 3 },
-  ];
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+
+      {/* 🔥 PODIUM */}
+      <Text style={[styles.title, { color: theme.colors.text }]}>Podium Musculaire</Text>
       
-      <Text style={[styles.title, { color: theme.colors.text }]}>
-        📊 Statistiques d’entraînement
-      </Text>
+      <View style={styles.podium}>
+        {podium.map((m, i) => (
+          <View key={i} style={[styles.podiumItem, { borderColor: theme.colors.accent }]}>
+            <Text style={[styles.podiumRank, { color: theme.colors.accent }]}>
+              #{i + 1}
+            </Text>
+            <Text style={[styles.podiumLabel, { color: theme.colors.text }]}>
+              {m.groupe}
+            </Text>
+            <Text style={[styles.podiumScore, { color: theme.colors.accent }]}>
+              {rankFromScore(m.rankScore)}
+            </Text>
+          </View>
+        ))}
+      </View>
 
-      {/* ------------------- LINE CHART ------------------- */}
+      {/* 🔥 RANK GLOBAL */}
+      <View style={[styles.globalRankBox, { borderColor: theme.colors.accent }]}>
+        <Text style={{ color: theme.colors.text, fontSize: 18 }}>Rank Global</Text>
+        <Text style={{ color: theme.colors.accent, fontSize: 45, fontWeight: "900" }}>
+          {globalRank}
+        </Text>
+      </View>
+
+      {/* 🔥 RADAR CHART */}
       <Text style={[styles.section, { color: theme.colors.accent }]}>
-        Progression des poids (Bench Press)
-      </Text>
-
-      <LineChart
-        data={lineData}
-        width={screenWidth}
-        height={220}
-        chartConfig={{
-          backgroundColor: theme.colors.card,
-          backgroundGradientFrom: theme.colors.card,
-          backgroundGradientTo: theme.colors.card,
-          color: () => theme.colors.accent,
-          labelColor: () => theme.colors.text,
-          propsForDots: { r: "5" },
-        }}
-        style={styles.chart}
-      />
-
-      {/* ------------------- BAR CHART ------------------- */}
-      <Text style={[styles.section, { color: theme.colors.accent }]}>
-        Volume total par groupe musculaire
-      </Text>
-
-      <BarChart
-        data={barData}
-        width={screenWidth}
-        height={250}
-        yAxisLabel=""
-        chartConfig={{
-          backgroundColor: theme.colors.card,
-          backgroundGradientFrom: theme.colors.card,
-          backgroundGradientTo: theme.colors.card,
-          decimalPlaces: 0,
-          color: () => theme.colors.accent,
-          labelColor: () => theme.colors.text,
-        }}
-        style={styles.chart}
-      />
-
-      {/* ------------------- RADAR CHART (ProgressChart) ------------------- */}
-      <Text style={[styles.section, { color: theme.colors.accent }]}>
-        Force relative par groupe (Radar Chart)
+        Répartition Force Musculaire
       </Text>
 
       <ProgressChart
         data={radarData}
-        width={screenWidth}
+        width={width}
         height={220}
-        strokeWidth={16}
-        radius={32}
+        strokeWidth={14}
+        radius={30}
         chartConfig={{
-          backgroundColor: theme.colors.card,
           backgroundGradientFrom: theme.colors.card,
           backgroundGradientTo: theme.colors.card,
           color: () => theme.colors.accent,
@@ -111,57 +97,26 @@ export default function StatistiquesScreen() {
         style={styles.chart}
       />
 
-      {/* ------------------- HEATMAP ------------------- */}
+      {/* 🔥 BAR CHART */}
       <Text style={[styles.section, { color: theme.colors.accent }]}>
-        Fréquence d'entraînement (Heatmap)
+        Score par groupe musculaire
       </Text>
 
-      <ContributionGraph
-        values={heatmapData}
-        endDate={new Date("2025-02-28")}
-        numDays={30}
-        width={screenWidth}
-        height={220}
+      <BarChart
+        data={{
+          labels: muscleStats.map((m) => m.groupe),
+          datasets: [{ data: muscleStats.map((m) => m.rankScore) }],
+        }}
+        width={width}
+        height={260}
         chartConfig={{
-          backgroundColor: theme.colors.card,
           backgroundGradientFrom: theme.colors.card,
           backgroundGradientTo: theme.colors.card,
-          color: (opacity = 1) => theme.colors.accent,
+          color: () => theme.colors.accent,
+          labelColor: () => theme.colors.text,
         }}
         style={styles.chart}
       />
-
-      {/* ------------------- RANK MUSCULAIRE ------------------- */}
-      <Text style={[styles.section, { color: theme.colors.accent }]}>
-        Rangs musculaires
-      </Text>
-
-      <View style={styles.rankBox}>
-        <Text style={[styles.rank, { color: "#ff4d4d" }]}>🟥 Poitrine : Rank B</Text>
-        <Text style={[styles.rank, { color: "#4dff4d" }]}>🟩 Dos : Rank A</Text>
-        <Text style={[styles.rank, { color: "#4da6ff" }]}>🟦 Jambes : Rank C</Text>
-        <Text style={[styles.rank, { color: "#ffd24d" }]}>🟨 Bras : Rank S</Text>
-      </View>
-
-      {/* ------------------- STATISTIQUES CLÉS ------------------- */}
-      <Text style={[styles.section, { color: theme.colors.accent }]}>
-        Statistiques clés
-      </Text>
-
-      <View style={[styles.statCard, { backgroundColor: theme.colors.card }]}>
-        <Text style={[styles.statTitle, { color: theme.colors.text }]}>Bench Max</Text>
-        <Text style={[styles.statValue, { color: theme.colors.accent }]}>100 kg</Text>
-      </View>
-
-      <View style={[styles.statCard, { backgroundColor: theme.colors.card }]}>
-        <Text style={[styles.statTitle, { color: theme.colors.text }]}>PR Total</Text>
-        <Text style={[styles.statValue, { color: theme.colors.accent }]}>+14% ce mois-ci</Text>
-      </View>
-
-      <View style={[styles.statCard, { backgroundColor: theme.colors.card }]}>
-        <Text style={[styles.statTitle, { color: theme.colors.text }]}>Volume record</Text>
-        <Text style={[styles.statValue, { color: theme.colors.accent }]}>10 200 kg</Text>
-      </View>
 
     </ScrollView>
   );
@@ -169,16 +124,36 @@ export default function StatistiquesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10 },
-  title: { fontSize: 30, fontWeight: "900", marginBottom: 15, textAlign: "center" },
-  section: { fontSize: 20, fontWeight: "700", marginTop: 20, marginBottom: 10 },
+
+  title: { fontSize: 32, fontWeight: "900", marginBottom: 20, textAlign: "center" },
+
+  section: { fontSize: 20, fontWeight: "700", marginBottom: 10, marginTop: 20 },
+
   chart: { borderRadius: 16 },
-  rankBox: { marginTop: 10, marginBottom: 20 },
-  rank: { fontSize: 18, fontWeight: "bold", marginBottom: 6 },
-  statCard: {
-    padding: 20,
-    borderRadius: 14,
-    marginBottom: 15,
+
+  podium: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginBottom: 20,
   },
-  statTitle: { fontSize: 18, fontWeight: "600" },
-  statValue: { fontSize: 28, fontWeight: "900", marginTop: 5 },
+
+  podiumItem: {
+    padding: 12,
+    borderRadius: 10,
+    borderWidth: 2,
+    alignItems: "center",
+    width: "30%",
+  },
+
+  podiumRank: { fontSize: 22, fontWeight: "900" },
+  podiumLabel: { fontSize: 16, marginTop: 5 },
+  podiumScore: { fontSize: 28, fontWeight: "900", marginTop: 5 },
+
+  globalRankBox: {
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 3,
+    alignItems: "center",
+    marginBottom: 20,
+  },
 });

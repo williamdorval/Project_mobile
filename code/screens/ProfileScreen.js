@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import { Calendar } from "react-native-calendars";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+
 
 import {
   getUserWorkouts,
@@ -20,6 +23,21 @@ export default function ProfileScreen({ navigation }) {
   const [markedDates, setMarkedDates] = useState({});
   const [monthCount, setMonthCount] = useState(0);
   const [streak, setStreak] = useState(0);
+
+  const sortedWorkouts = [...workouts].sort((a, b) => {
+  // Les terminés en premier
+  if (a.ended_at && !b.ended_at) return -1;
+  if (!a.ended_at && b.ended_at) return 1;
+
+  // Pour les terminés : ordre par date de fin
+  if (a.ended_at && b.ended_at) {
+    return new Date(b.ended_at) - new Date(a.ended_at);
+  }
+
+  // Pour les non terminés : ordre par date de début
+  return new Date(b.started_at) - new Date(a.started_at);
+});
+
 
   // Load everything from Martha
   async function loadProfileData() {
@@ -51,6 +69,14 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     loadProfileData();
   }, [user]);
+
+  useFocusEffect(
+  useCallback(() => {
+    if (user) {
+      loadProfileData();
+    }
+  }, [user])
+  );
 
   // -------------------------------
   // ❤️ ÉTAT NON CONNECTÉ (VERSION WOW)
@@ -163,14 +189,18 @@ export default function ProfileScreen({ navigation }) {
       <Text style={[styles.sectionTitle, { color: theme.colors.accent, marginTop: 20 }]}>
         Derniers entraînements
       </Text>
+      
 
-      {workouts.slice(0, 3).map((w) => (
-        <View key={w.id} style={[styles.workoutCard, { backgroundColor: theme.colors.card }]}>
-          <Text style={[styles.workoutTitle, { color: theme.colors.text }]}>{w.nom}</Text>
-          <Text style={{ color: theme.colors.muted }}>{w.description}</Text>
-          <Text style={{ color: theme.colors.accent }}>{w.started_at}</Text>
-        </View>
-      ))}
+    {sortedWorkouts.slice(0, 3).map((w) => (
+      <View key={w.id} style={[styles.workoutCard, { backgroundColor: theme.colors.card }]}>
+        <Text style={[styles.workoutTitle, { color: theme.colors.text }]}>{w.nom}</Text>
+        <Text style={{ color: theme.colors.muted }}>{w.description}</Text>
+        <Text style={{ color: theme.colors.accent }}>
+         {w.ended_at ? "Terminé le " + w.ended_at : "Commencé le " + w.started_at}
+        </Text>
+      </View>
+    ))}
+
 
       {/* LOGOUT */}
       <TouchableOpacity

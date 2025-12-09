@@ -7,6 +7,12 @@ import CompleteProfileScreen from "./screens/CompleteProfileScreen";
 import ExercicesScreen from "./screens/ExercisesScreen";
 import MainTabs from "./components/BottomNav";
 
+import EntrainementScreen from "./screens/EntrainementScreen";
+import CreateWorkoutScreen from "./screens/CreateWorkoutScreen";
+import WorkoutDetailScreen from "./screens/WorkoutDetailScreen";
+
+
+
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
@@ -27,6 +33,11 @@ export default function RootNavigator() {
 
       {/* Exercices */}
       <Stack.Screen name="Exercices" component={ExercicesScreen} />
+
+      <Stack.Screen name="CreateWorkout" component={CreateWorkoutScreen} />
+      <Stack.Screen name="WorkoutDetail" component={WorkoutDetailScreen} />
+      <Stack.Screen name="Entrainement" component={EntrainementScreen} />
+
 
     </Stack.Navigator>
   );

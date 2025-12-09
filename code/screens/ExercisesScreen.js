@@ -1,37 +1,31 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from "react-native";
-import { useRoute } from "@react-navigation/native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
+import { useRoute, useNavigation } from "@react-navigation/native";
 import { useTheme } from "../context/ThemeContext";
 import { getExercicesByMuscle } from "../services/martha";
 
 export default function ExercicesScreen() {
   const route = useRoute();
+  const navigation = useNavigation();
   const theme = useTheme();
   const { groupe } = route.params;
 
   const [loading, setLoading] = useState(true);
   const [exercices, setExercices] = useState([]);
 
-  console.log("GROUPE REÇU =", groupe);
-
-
-
-async function loadData() {
-  try {
-    const data = await getExercicesByMuscle(groupe);
-    console.log("DATA FINAL =", data);
-    setExercices(data);
-  } catch (err) {
-    console.error("Erreur chargement exercices :", err);
+  async function loadData() {
+    try {
+      const data = await getExercicesByMuscle(groupe);
+      setExercices(data);
+    } catch (err) {
+      console.error("Erreur chargement exercices :", err);
+    }
+    setLoading(false);
   }
-  setLoading(false);
-}
-
 
   useEffect(() => {
     loadData();
   }, []);
-
 
   if (loading) {
     return (
@@ -46,6 +40,14 @@ async function loadData() {
       <Text style={[styles.title, { color: theme.colors.text }]}>
         Exercices : {groupe}
       </Text>
+
+      {/* 🔥 Bouton pour aller gérer les workouts */}
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: theme.colors.accent }]}
+        onPress={() => navigation.navigate("Workouts")}
+      >
+        <Text style={styles.buttonText}>Commencer un entraînement</Text>
+      </TouchableOpacity>
 
       {exercices.length === 0 && (
         <Text style={{ color: theme.colors.text, marginTop: 10 }}>
@@ -71,6 +73,17 @@ async function loadData() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
   title: { fontSize: 24, fontWeight: "bold", marginBottom: 15 },
+  button: {
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 16,
+  },
   card: { padding: 16, borderRadius: 12, marginBottom: 12 },
   name: { fontSize: 18, fontWeight: "bold" },
 });
