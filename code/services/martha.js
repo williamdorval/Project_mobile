@@ -97,3 +97,21 @@ export async function getUserStreak(id) {
   const r = await marthaPostSimple("select-user-streak", { id });
   return r?.data?.[0]?.streak ?? 0;
 }
+export async function getUserMuscleScores(id) {
+  const r = await marthaPostSimple("select-user-muscle-scores", { id });
+
+  return r.data.map((row) => {
+    const score = row.best_score || 0;
+    const avg = row.avg_world || 1;
+
+    const rankScore = (score / (avg * 10)) * 100; 
+
+    return {
+      groupe: row.groupe_musculaire,
+      best: score,
+      world: avg,
+      rankScore,
+    };
+  });
+}
+
