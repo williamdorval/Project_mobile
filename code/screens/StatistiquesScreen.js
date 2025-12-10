@@ -42,7 +42,7 @@ useFocusEffect(
           ? forceScores.reduce((a, b) => a + b, 0) / forceScores.length
           : 0;
 
-      const disciplineScore = Math.min(100, (recentWorkouts / 12) * 100);
+      const disciplineScore = Math.min(100, (recentWorkouts / 28) * 100);
 
       let variance = 0;
       const avgF =
@@ -70,19 +70,19 @@ useFocusEffect(
 
 
   function rankFromScore(score) {
-    if (score >= 120) return "S";
-    if (score >= 100) return "A";
-    if (score >= 80) return "B";
+    if (score >= 150) return "S";
+    if (score >= 125) return "A";
+    if (score >= 95) return "B";
     if (score >= 60) return "C";
     return "D";
   }
 
-  // 🔥 Podium (top 3 muscles)
+  
   const podium = [...muscleStats]
     .sort((a, b) => (b.rankScore || 0) - (a.rankScore || 0))
     .slice(0, 3);
 
-  // Radar chart data
+  
   const radarData = {
     labels: muscleStats.map(m => m.groupe),
     data: muscleStats.map(m => Math.min(1, (m.rankScore || 0) / 120))
@@ -92,7 +92,7 @@ useFocusEffect(
     <ScrollView
       style={[styles.container, { backgroundColor: theme.colors.background }]}
     >
-      {/* 🔥 PODIUM */}
+      
       <Text style={[styles.title, { color: theme.colors.text }]}>
         Podium Musculaire
       </Text>
@@ -116,7 +116,7 @@ useFocusEffect(
         ))}
       </View>
 
-      {/* 🔥 RANK GLOBAL */}
+      
       <View
         style={[styles.globalRankBox, { borderColor: theme.colors.accent }]}
       >
@@ -134,7 +134,7 @@ useFocusEffect(
         </Text>
       </View>
 
-      {/* 🔥 RADAR CHART */}
+      
       <Text style={[styles.section, { color: theme.colors.accent }]}>
         Répartition Force Musculaire
       </Text>
@@ -154,7 +154,7 @@ useFocusEffect(
         style={styles.chart}
       />
 
-      {/* 🔥 BAR CHART */}
+     
       <Text style={[styles.section, { color: theme.colors.accent }]}>
         Score par groupe musculaire
       </Text>
