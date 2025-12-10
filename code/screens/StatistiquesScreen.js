@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
-import { LineChart, BarChart, ProgressChart } from "react-native-chart-kit";
+import { BarChart, ProgressChart } from "react-native-chart-kit";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
-import { getUserMuscleScores } from "../services/martha";
+import { getUserMuscleScores, updateUserRank, getUserDiscipline } from "../services/martha";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+
 
 export default function StatistiquesScreen() {
   const theme = useTheme();
@@ -13,22 +16,58 @@ export default function StatistiquesScreen() {
   const [muscleStats, setMuscleStats] = useState([]);
   const [globalRank, setGlobalRank] = useState("C");
 
-  useEffect(() => {
+useFocusEffect(
+  useCallback(() => {
     async function load() {
       if (!user) return;
 
       const stats = await getUserMuscleScores(user.id);
-      setMuscleStats(stats);
+      console.log("🔥 STATS BRUTES REÇUES =", stats);
 
-      // ⚡ Calcul du rank global
-      let total = 0;
-      stats.forEach((m) => total += m.rankScore);
-      const avg = total / stats.length;
+      setMuscleStats(stats || []);
 
-      setGlobalRank(rankFromScore(avg));
+      let disciplineData = null;
+      try {
+        disciplineData = await getUserDiscipline(user.id);
+      } catch (e) {
+        console.log("Erreur getUserDiscipline :", e);
+      }
+
+      const recentWorkouts =
+        disciplineData?.recent_workouts ?? 0;
+
+      const forceScores = (stats || []).map(m => m.rankScore || 0);
+      const force =
+        forceScores.length > 0
+          ? forceScores.reduce((a, b) => a + b, 0) / forceScores.length
+          : 0;
+
+      const disciplineScore = Math.min(100, (recentWorkouts / 12) * 100);
+
+      let variance = 0;
+      const avgF =
+        forceScores.length > 0
+          ? forceScores.reduce((a, b) => a + b, 0) / forceScores.length
+          : 0;
+
+      forceScores.forEach(f => {
+        variance += Math.pow(f - avgF, 2);
+      });
+
+      variance = forceScores.length > 0 ? variance / forceScores.length : 0;
+      const consistence = Math.max(0, 100 - variance);
+
+      const final = (force + disciplineScore + consistence) / 3;
+      const newRank = rankFromScore(final);
+
+      setGlobalRank(newRank);
+      await updateUserRank(user.id, newRank);
     }
+
     load();
-  }, [user]);
+  }, [user])
+);
+
 
   function rankFromScore(score) {
     if (score >= 120) return "S";
@@ -38,24 +77,32 @@ export default function StatistiquesScreen() {
     return "D";
   }
 
-  // 🔥 Podium data
-  const podium = [...muscleStats].sort((a, b) => b.rankScore - a.rankScore).slice(0, 3);
+  // 🔥 Podium (top 3 muscles)
+  const podium = [...muscleStats]
+    .sort((a, b) => (b.rankScore || 0) - (a.rankScore || 0))
+    .slice(0, 3);
 
-  // Radar / ProgressChart data
+  // Radar chart data
   const radarData = {
-    labels: muscleStats.map((m) => m.groupe),
-    data: muscleStats.map((m) => Math.min(1, m.rankScore / 120)),
+    labels: muscleStats.map(m => m.groupe),
+    data: muscleStats.map(m => Math.min(1, (m.rankScore || 0) / 120))
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {/* 🔥 PODIUM */}
-      <Text style={[styles.title, { color: theme.colors.text }]}>Podium Musculaire</Text>
-      
+      <Text style={[styles.title, { color: theme.colors.text }]}>
+        Podium Musculaire
+      </Text>
+
       <View style={styles.podium}>
         {podium.map((m, i) => (
-          <View key={i} style={[styles.podiumItem, { borderColor: theme.colors.accent }]}>
+          <View
+            key={i}
+            style={[styles.podiumItem, { borderColor: theme.colors.accent }]}
+          >
             <Text style={[styles.podiumRank, { color: theme.colors.accent }]}>
               #{i + 1}
             </Text>
@@ -63,16 +110,26 @@ export default function StatistiquesScreen() {
               {m.groupe}
             </Text>
             <Text style={[styles.podiumScore, { color: theme.colors.accent }]}>
-              {rankFromScore(m.rankScore)}
+              {rankFromScore(m.rankScore || 0)}
             </Text>
           </View>
         ))}
       </View>
 
       {/* 🔥 RANK GLOBAL */}
-      <View style={[styles.globalRankBox, { borderColor: theme.colors.accent }]}>
-        <Text style={{ color: theme.colors.text, fontSize: 18 }}>Rank Global</Text>
-        <Text style={{ color: theme.colors.accent, fontSize: 45, fontWeight: "900" }}>
+      <View
+        style={[styles.globalRankBox, { borderColor: theme.colors.accent }]}
+      >
+        <Text style={{ color: theme.colors.text, fontSize: 18 }}>
+          Rank Global
+        </Text>
+        <Text
+          style={{
+            color: theme.colors.accent,
+            fontSize: 45,
+            fontWeight: "900"
+          }}
+        >
           {globalRank}
         </Text>
       </View>
@@ -92,7 +149,7 @@ export default function StatistiquesScreen() {
           backgroundGradientFrom: theme.colors.card,
           backgroundGradientTo: theme.colors.card,
           color: () => theme.colors.accent,
-          labelColor: () => theme.colors.text,
+          labelColor: () => theme.colors.text
         }}
         style={styles.chart}
       />
@@ -104,8 +161,8 @@ export default function StatistiquesScreen() {
 
       <BarChart
         data={{
-          labels: muscleStats.map((m) => m.groupe),
-          datasets: [{ data: muscleStats.map((m) => m.rankScore) }],
+          labels: muscleStats.map(m => m.groupe),
+          datasets: [{ data: muscleStats.map(m => m.rankScore || 0) }]
         }}
         width={width}
         height={260}
@@ -113,11 +170,10 @@ export default function StatistiquesScreen() {
           backgroundGradientFrom: theme.colors.card,
           backgroundGradientTo: theme.colors.card,
           color: () => theme.colors.accent,
-          labelColor: () => theme.colors.text,
+          labelColor: () => theme.colors.text
         }}
         style={styles.chart}
       />
-
     </ScrollView>
   );
 }
@@ -125,16 +181,26 @@ export default function StatistiquesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 10 },
 
-  title: { fontSize: 32, fontWeight: "900", marginBottom: 20, textAlign: "center" },
+  title: {
+    fontSize: 32,
+    fontWeight: "900",
+    marginBottom: 20,
+    textAlign: "center"
+  },
 
-  section: { fontSize: 20, fontWeight: "700", marginBottom: 10, marginTop: 20 },
+  section: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 10,
+    marginTop: 20
+  },
 
   chart: { borderRadius: 16 },
 
   podium: {
     flexDirection: "row",
     justifyContent: "space-around",
-    marginBottom: 20,
+    marginBottom: 20
   },
 
   podiumItem: {
@@ -142,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     alignItems: "center",
-    width: "30%",
+    width: "30%"
   },
 
   podiumRank: { fontSize: 22, fontWeight: "900" },
@@ -154,6 +220,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 3,
     alignItems: "center",
-    marginBottom: 20,
-  },
+    marginBottom: 20
+  }
 });

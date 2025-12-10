@@ -186,3 +186,22 @@ export async function createWorkout(userId, nom, description, exercices) {
 
   return workoutId;
 }
+
+export async function updateWorkoutStartDate(workoutId, userId, newDate) {
+  return marthaPostSimple("update-start-date", {
+    workout_id: workoutId,
+    user_id: userId,
+    new_date: newDate
+  });
+}
+
+export async function updateUserRank(id, rank) {
+  return marthaPostSimple("update-user-rank", { id, rank });
+}
+
+
+export async function getUserDiscipline(id) {
+  const r = await marthaPostSimple("select-user-discipline", { id });
+  return r?.data?.[0] ?? null;
+}
+

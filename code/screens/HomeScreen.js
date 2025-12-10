@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from "../context/AuthContext";
+import { useIsFocused } from "@react-navigation/native";
+
 
 import {
   getUserById,
@@ -43,14 +45,22 @@ export default function HomeScreen() {
     setLoadingData(false);
   }
 
-  useEffect(() => {
+  
+  const isFocused = useIsFocused();
+
+
+useEffect(() => {
     if (!authUser) {
-      setLoadingData(false); // pas connecté → pas d'appel
-      return;
+        setLoadingData(false);
+        return;
     }
 
-    loadData(authUser.id);
-  }, [authUser]);
+    // 🔥 recharge les données à CHAQUE fois
+    if (isFocused) {
+        setLoadingData(true);
+        loadData(authUser.id);
+    }
+}, [authUser, isFocused]);
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
